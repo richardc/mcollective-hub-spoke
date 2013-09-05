@@ -38,7 +38,7 @@ node /^node\d+.example.com/ {
     ensure => latest,
   } ->
   class { 'mcollective':
-    middleware_hosts   => [ 'broker1.example.com', 'broker2.example.com', 'broker3.example.com' ],
+    middleware_hosts   => [ 'broker0.example.com', 'broker1.example.com', 'broker2.example.com', 'broker3.example.com' ],
     securityprovider   => 'psk',
     ssl_client_certs   => 'puppet:///modules/site_mcollective/certs',
     ssl_ca_cert        => 'puppet:///modules/site_mcollective/certs/ca.pem',
