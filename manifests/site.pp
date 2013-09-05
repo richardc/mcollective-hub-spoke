@@ -40,4 +40,7 @@ node /^node\d+.example.com/ {
     ssl_server_public  => 'puppet:///modules/site_mcollective/certs/server.pem',
     ssl_server_private => 'puppet:///modules/site_mcollective/private_keys/server.pem',
   }
+
+  $extra = range(1, 40)
+  site_mcollective::extra_server { $extra: }
 }
