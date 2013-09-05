@@ -1,0 +1,122 @@
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:amq="http://activemq.apache.org/schema/core"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+  http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+  http://activemq.apache.org/camel/schema/spring http://activemq.apache.org/camel/schema/spring/camel-spring.xsd">
+
+    <bean class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+        <property name="optimizeAcknowledge">
+            <value>true</value>
+        </property>
+        <property name="alwaysSessionAsync">
+            <value>false</value>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <value>file:${activemq.base}/conf/credentials.properties</value>
+        </property>
+    </bean>
+
+    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="<%= @fqdn %>" useJmx="true" schedulePeriodForDestinationPurge="60000" networkConnectorStartAsync="true" deleteAllMessagesOnStartup="true"  persistent="false">
+        <destinationPolicy>
+          <policyMap>
+            <policyEntries>
+              <policyEntry topic=">" producerFlowControl="false"  topicPrefetch="16000" optimizedDispatch="true"/>
+              <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimoutBeforeGC="300000" optimizedDispatch="true" producerFlowControl="false" />
+            </policyEntries>
+          </policyMap>
+        </destinationPolicy>
+
+        <managementContext>
+            <managementContext createConnector="false"/>
+        </managementContext>
+
+	<% if @mcollective_hub %>
+        <networkConnectors>
+          <networkConnector
+                name="<%= @fqdn %>-<%= @mcollective_hub %>-topics"
+                uri="static:(ssl://<%= @mcollective_hub %>:6167)"
+                duplex="true"
+                decreaseNetworkConsumerPriority="true"
+                networkTTL="2"
+                dynamicOnly="true">
+                <excludedDestinations>
+                        <queue physicalName=">" />
+                </excludedDestinations>
+          </networkConnector>
+          <networkConnector
+                name="<%= @fqdn %>-<%= @mcollective_hub %>-queues"
+                uri="static:(ssl://<%= @mcollective_hub %>:6167)"
+                duplex="true"
+                decreaseNetworkConsumerPriority="true"
+                networkTTL="2"
+                dynamicOnly="true"
+                conduitSubscriptions="false">
+                <excludedDestinations>
+                        <topic physicalName=">" />
+                </excludedDestinations>
+          </networkConnector>
+        </networkConnectors>
+	<% end %>
+
+        <persistenceAdapter>
+          <kahaDB directory="/var/cache/activemq/data" journalMaxFileLength="64mb"/>
+        </persistenceAdapter>
+
+        <plugins>
+          <statisticsBrokerPlugin/>
+          <simpleAuthenticationPlugin>
+            <users>
+              <authenticationUser username="<%= scope["mcollective::middleware_user_real"] %>" password="<%= scope["mcollective::middleware_password_real"] %>" groups="mcollective,everyone"/>
+              <authenticationUser username="admin" password="secret" groups="mcollective,admins,everyone"/>
+            </users>
+          </simpleAuthenticationPlugin>
+
+          <authorizationPlugin>
+            <map>
+              <authorizationMap>
+                <authorizationEntries>
+                  <authorizationEntry queue=">" write="admins" read="admins" admin="admins" />
+                  <authorizationEntry topic=">" write="admins" read="admins" admin="admins" />
+     		  <authorizationEntry queue="*.>" write="mcollective" read="mcollective" admin="mcollective" />
+     		  <authorizationEntry topic="*.>" write="mcollective" read="mcollective" admin="mcollective" />
+                  <authorizationEntry topic="ActiveMQ.Advisory.>" write="everyone" read="everyone" admin="everyone" />
+                </authorizationEntries>
+              </authorizationMap>
+            </map>
+          </authorizationPlugin>
+        </plugins>
+
+        <sslContext>
+            <sslContext
+                keyStore="keystore.jks" keyStorePassword="puppet"
+                trustStore="truststore.jks" trustStorePassword="puppet"
+            />
+        </sslContext>
+
+        <systemUsage>
+            <systemUsage>
+                <memoryUsage>
+                    <memoryUsage limit="3 gb"/>
+                </memoryUsage>
+                <storeUsage>
+                    <storeUsage limit="10 gb" name="foo"/>
+                </storeUsage>
+                <tempUsage>
+                    <tempUsage limit="1 gb"/>
+                </tempUsage>
+            </systemUsage>
+        </systemUsage>
+
+        <transportConnectors>
+            <transportConnector name="openwiressl" uri="ssl://0.0.0.0:6167"/>
+            <transportConnector name="stompssl" uri="stomp+ssl://0.0.0.0:61614?maximumConnections=800"/>
+        </transportConnectors>
+
+    </broker>
+    <import resource="jetty.xml"/>
+</beans>
