@@ -35,11 +35,13 @@
             <managementContext createConnector="false"/>
         </managementContext>
 
-	<% if @mcollective_hub %>
+        <% if @mcollective_hub %>
         <networkConnectors>
           <networkConnector
                 name="<%= @fqdn %>-<%= @mcollective_hub %>-topics"
                 uri="static:(ssl://<%= @mcollective_hub %>:6167)"
+                userName="admin"
+                password="secret"
                 duplex="true"
                 decreaseNetworkConsumerPriority="true"
                 networkTTL="2"
@@ -51,6 +53,8 @@
           <networkConnector
                 name="<%= @fqdn %>-<%= @mcollective_hub %>-queues"
                 uri="static:(ssl://<%= @mcollective_hub %>:6167)"
+                userName="admin"
+                password="secret"
                 duplex="true"
                 decreaseNetworkConsumerPriority="true"
                 networkTTL="2"
@@ -61,7 +65,7 @@
                 </excludedDestinations>
           </networkConnector>
         </networkConnectors>
-	<% end %>
+        <% end %>
 
         <persistenceAdapter>
           <kahaDB directory="/var/cache/activemq/data" journalMaxFileLength="64mb"/>
@@ -82,8 +86,8 @@
                 <authorizationEntries>
                   <authorizationEntry queue=">" write="admins" read="admins" admin="admins" />
                   <authorizationEntry topic=">" write="admins" read="admins" admin="admins" />
-     		  <authorizationEntry queue="*.>" write="mcollective" read="mcollective" admin="mcollective" />
-     		  <authorizationEntry topic="*.>" write="mcollective" read="mcollective" admin="mcollective" />
+                  <authorizationEntry queue="*.>" write="mcollective" read="mcollective" admin="mcollective" />
+                  <authorizationEntry topic="*.>" write="mcollective" read="mcollective" admin="mcollective" />
                   <authorizationEntry topic="ActiveMQ.Advisory.>" write="everyone" read="everyone" admin="everyone" />
                 </authorizationEntries>
               </authorizationMap>
