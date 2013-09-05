@@ -1,4 +1,5 @@
 node 'hub.example.com' {
+  class { 'vagrant_hosts': } ->
   class { 'puppetlabs_repos': } ->
   package { 'hiera':
     ensure => latest,
@@ -24,6 +25,7 @@ node 'hub.example.com' {
 
 node /^broker\d+\.example.com/ {
   $mcollective_hub = 'hub.example.com'
+  class { 'vagrant_hosts': } ->
   class { 'puppetlabs_repos': } ->
   package { 'hiera':
     ensure => latest,
@@ -48,6 +50,7 @@ node /^broker\d+\.example.com/ {
 }
 
 node /^node\d+.example.com/ {
+  class { 'vagrant_hosts': } ->
   class { 'puppetlabs_repos': } ->
   package { 'hiera':
     ensure => latest,
