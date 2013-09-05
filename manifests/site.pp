@@ -3,6 +3,11 @@ node 'hub.example.com', /^broker\d+\.example.com/ {
     $mcollective_hub = 'hub.example.com'
   }
 
+  service { 'iptables':
+    ensure => 'stopped',
+    enable => false,
+  }
+
   class { 'vagrant_hosts': } ->
   class { 'puppetlabs_repos': } ->
   package { 'hiera':
