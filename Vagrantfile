@@ -2,7 +2,8 @@
 
 require 'json'
 
-data = JSON.parse(IO.read('data/common.json'))
+path = File.dirname(__FILE__)
+data = JSON.parse(IO.read("#{path}/data/common.json"))
 
 BROKERS = data["spoke_demo::brokers"].to_i
 NODES = data["spoke_demo::nodes"].to_i
