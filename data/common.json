@@ -1,0 +1,7 @@
+{
+    "spoke_demo::brokers": "2",
+    "spoke_demo::nodes": "10",
+    "spoke_demo::extra_agents": "50",
+    "spoke_demo::network": "192.168.19",
+    "spoke_demo::domain": "example.com"
+}

@@ -8,7 +8,9 @@ node 'hub.example.com', /^broker\d+\.example.com/ {
     enable => false,
   }
 
-  class { 'vagrant_hosts': } ->
+  include spoke_demo
+
+  Class['spoke_demo'] ->
   class { 'puppetlabs_repos': } ->
   package { 'hiera':
     ensure => latest,
@@ -32,7 +34,9 @@ node 'hub.example.com', /^broker\d+\.example.com/ {
 }
 
 node /^node\d+.example.com/ {
-  class { 'vagrant_hosts': } ->
+  include spoke_demo
+
+  Class['spoke_demo'] ->
   class { 'puppetlabs_repos': } ->
   package { 'hiera':
     ensure => latest,
@@ -46,6 +50,6 @@ node /^node\d+.example.com/ {
     ssl_server_private => 'puppet:///modules/site_mcollective/private_keys/server.pem',
   }
 
-  $extra = range(1, 40)
+  $extra = range(1, hiera('spoke_demo::extra_agents', '0'))
   site_mcollective::extra_server { $extra: }
 }

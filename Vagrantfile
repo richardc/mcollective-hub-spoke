@@ -1,11 +1,15 @@
 #!ruby
 
-VAGRANTFILE_API_VERSION = "2"
-BROKERS = 2
-NODES = 2
-NETWORK = '192.168.19'
+require 'json'
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+data = JSON.parse(IO.read('data/common.json'))
+
+BROKERS = data["spoke_demo::brokers"].to_i
+NODES = data["spoke_demo::nodes"].to_i
+NETWORK = data["spoke_demo::network"]
+DOMAIN = data["spoke_demo::domain"]
+
+Vagrant.configure("2") do |config|
   config.vm.box = "centos-64"
   config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-64-x64-vbox4210.box"
 
@@ -13,16 +17,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     puppet.module_path = "modules"
     puppet.manifests_path = "manifests"
     puppet.manifest_file  = "site.pp"
+    puppet.options = "--hiera_config /vagrant/hiera.yaml"
   end
 
   config.vm.define :hub do |hub|
-    hub.vm.hostname = 'hub.example.com'
+    hub.vm.hostname = "hub.#{DOMAIN}"
     hub.vm.network :private_network, ip: "#{NETWORK}.10"
   end
 
   BROKERS.times do |i|
     config.vm.define "broker#{i}" do |broker|
-      broker.vm.hostname = "broker#{i}.example.com"
+      broker.vm.hostname = "broker#{i}.#{DOMAIN}"
       broker.vm.network :private_network, ip: "#{NETWORK}.#{50 + i}"
     end
   end

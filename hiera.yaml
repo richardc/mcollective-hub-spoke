@@ -1,0 +1,8 @@
+---
+:backends:
+  - json
+:json:
+  :datadir: /vagrant/data
+:hierarchy:
+  - "%{::fqdn}"
+  - common
