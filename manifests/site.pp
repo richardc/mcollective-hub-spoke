@@ -19,7 +19,7 @@ node 'hub.example.com', /^broker\d+\.example.com/ {
     client             => true,
     middleware         => true,
     middleware_hosts   => [ 'localhost' ],
-    securityprovider   => 'psk',
+    securityprovider   => 'ssl',
     activemq_template  => 'site_mcollective/activemq.xml.erb',
     ssl_client_certs   => 'puppet:///modules/site_mcollective/certs',
     ssl_ca_cert        => 'puppet:///modules/site_mcollective/certs/ca.pem',
@@ -28,8 +28,8 @@ node 'hub.example.com', /^broker\d+\.example.com/ {
   }
 
   mcollective::user { 'vagrant':
-    certificate => 'puppet:///modules/site_mcollective/certs/root.pem',
-    private_key => 'puppet:///modules/site_mcollective/private_keys/root.pem',
+    certificate => 'puppet:///modules/site_mcollective/certs/vagrant.pem',
+    private_key => 'puppet:///modules/site_mcollective/private_keys/vagrant.pem',
   }
 }
 
@@ -43,7 +43,7 @@ node /^node\d+.example.com/ {
   } ->
   class { 'mcollective':
     middleware_hosts   => [ 'broker0.example.com', 'broker1.example.com', 'broker2.example.com', 'broker3.example.com' ],
-    securityprovider   => 'psk',
+    securityprovider   => 'ssl',
     ssl_client_certs   => 'puppet:///modules/site_mcollective/certs',
     ssl_ca_cert        => 'puppet:///modules/site_mcollective/certs/ca.pem',
     ssl_server_public  => 'puppet:///modules/site_mcollective/certs/server.pem',
